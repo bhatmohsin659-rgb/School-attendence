@@ -42,7 +42,7 @@ jobs:
             ./gradlew assembleDebug
           else
             echo "ERROR: gradlew not found inside ZIP"
-            exit 1
+            exit 2
           fi
 
       - name: Upload APK
