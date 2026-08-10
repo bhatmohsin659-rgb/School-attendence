@@ -14,6 +14,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Extract project
+        run: |
+          mkdir project
+          unzip -q SchoolAttendanceApp_APK_Ready.zip -d project
+
+      - name: Find Gradle project
+        run: |
+          find project -name gradlew -type f
+          find project -name build.gradle -o -name build.gradle.kts
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -25,11 +35,18 @@ jobs:
 
       - name: Build APK
         run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug
+          GRADLEW=$(find project -name gradlew -type f | head -n 1)
+          if [ -n "$GRADLEW" ]; then
+            chmod +x "$GRADLEW"
+            cd "$(dirname "$GRADLEW")"
+            ./gradlew assembleDebug
+          else
+            echo "ERROR: gradlew not found inside ZIP"
+            exit 1
+          fi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: school-attendance-apk
-          path: "**/build/outputs/apk/debug/*.apk"
+          path: "project/**/build/outputs/apk/debug/*.apk"
